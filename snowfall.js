@@ -1,201 +1,50 @@
-const snowfall = function(selector, options) {
-  if (typeof selector === 'undefined') {
-    throw new Error('No selector present. Define an element.');
+let petals = []; //array function that holds cherry blossom petals
+
+function setup() {
+  createCanvas(1980, 1080);
+  //stroke(127, 63, 120);
+  fill(255, 230, 243);
+  noStroke();
+} //draws background
+
+function draw() {
+  background(153, 235, 255);
+  let t = frameCount / 100; //updates time
+
+  for (var i = 0; i < 10; i++) {
+    petals.push(new petal()); //append petal object
+  } //random number of petals each frame
+
+  //loop through petals
+  for (let blossom of petals) {
+    blossom.update(t); //update petal position
+    blossom.display(); //draw petal
   }
+}
+//petal class
+function petal() {
+  // initialize coordinates
+  this.posX = 0;
+  this.posY = random(-50, 0);
+  this.initialangle = random(10, 0 * PI);
+  this.size = random(5, 10);
+  //ellipse(10, 20, 20, 7);
 
-  this.el = document.querySelector(selector);
+  this.radius = sqrt(random(pow(width / 1, 2)));
+  this.update = function(time) {
+    // x position follows a circle
+    let w = 0.1; // angular speed
+    let angle = w * time + this.initialangle;
+    this.posX = width / 1 + this.radius * tan(angle); //calculates tangent of the angle the petals fall
+    this.posY += pow(this.size, 0.5);
 
-  // Defaults for the option object, which gets extended below.
-  const defaults = {
-    className: 'snowfall', // Classname of the petal. This corresponds with the css.
-    fallSpeed: 1, // Speed factor in which the petal falls (higher is slower).
-    maxSize: 14, // The maximum size of the petal.
-    minSize: 10, // The minimum size of the petal.
-    delay: 300, // Delay between petals.
-    colors: [
-      {
-        // You can add multiple colors (chosen randomly) by adding elements to the array.
-        gradientColorStart: 'rgba(255, 183, 197, 0.9)', // Gradient color start (rgba).
-        gradientColorEnd: 'rgba(255, 197, 208, 0.9)', // Gradient color end (rgba).
-        gradientColorDegree: 120, // Gradient degree angle.
-      },
-    ],
-  };
-
-  // Merge defaults with user options.
-  const extend = function(originalObj, newObj) {
-    Object.keys(originalObj).forEach(key => {
-      if (newObj && Object.prototype.hasOwnProperty.call(newObj, key)) {
-        const origin = originalObj;
-        origin[key] = newObj[key];
-      }
-    });
-
-    return originalObj;
-  };
-
-  this.settings = extend(defaults, options);
-
-  // Hide horizontal scrollbars on the target element.
-  this.el.style.overflowX = 'hidden';
-
-  // Random array element
-  function randomArrayElem(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
-  }
-
-  // Random integer
-  function randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
-  // Check for animation events.
-  const prefixes = ['webkit', 'moz', 'MS', 'o', ''];
-  function PrefixedEvent(element, type, callback) {
-    for (let p = 0; p < prefixes.length; p += 1) {
-      let animType = type;
-
-      if (!prefixes[p]) {
-        animType = type.toLowerCase();
-      }
-
-      element.addEventListener(prefixes[p] + animType, callback, false);
+    // delete petal if past end of screen
+    if (this.posY > height) {
+      let index = petals.indexOf(this);
+      petals.splice(index, 1);
     }
-  }
-
-  // Check if the element is in the viewport.
-  function elementInViewport(el) {
-    const rect = el.getBoundingClientRect();
-
-    return (
-      rect.top >= 0 &&
-      rect.left >= 0 &&
-      rect.bottom <=
-        (window.innerHeight || document.documentElement.clientHeight) &&
-      rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-    );
-  }
-
-  this.createPetal = () => {
-    if (this.el.dataset.snowfallAnimId) {
-      setTimeout(() => {
-        window.requestAnimationFrame(this.createPetal);
-      }, this.settings.delay);
-    }
-
-    // Name the animations. These have to match the animations in the CSS file.
-    const animationNames = {
-      blowAnimations: [
-        'blow-soft-left',
-        'blow-medium-left',
-        'blow-soft-right',
-        'blow-medium-right',
-      ],
-      swayAnimations: [
-        'sway-0',
-        'sway-1',
-        'sway-2',
-        'sway-3',
-        'sway-4',
-        'sway-5',
-        'sway-6',
-        'sway-7',
-        'sway-8',
-      ],
-    };
-
-    // Get one random animation of each type and randomize fall time of the petals
-    const blowAnimation = randomArrayElem(animationNames.blowAnimations);
-    const swayAnimation = randomArrayElem(animationNames.swayAnimations);
-    const fallTime =
-      (document.documentElement.clientHeight * 0.007 +
-        Math.round(Math.random() * 5)) *
-      this.settings.fallSpeed;
-
-    // Create animations
-    const animationsArr = [
-      `fall ${fallTime}s linear 0s 1`,
-      `${blowAnimation} ${(fallTime > 30 ? fallTime : 30) -
-        20 +
-        randomInt(0, 20)}s linear 0s infinite`,
-      `${swayAnimation} ${randomInt(2, 4)}s linear 0s infinite`,
-    ];
-    const animations = animationsArr.join(', ');
-
-    // Create petal and give it a random size.
-    const petal = document.createElement('div');
-    petal.classList.add(this.settings.className);
-    const height = randomInt(this.settings.minSize, this.settings.maxSize);
-    const width = height - Math.floor(randomInt(0, this.settings.minSize) / 3);
-
-    // Get a random color.
-    const color = randomArrayElem(this.settings.colors);
-
-    petal.style.background = `linear-gradient(${color.gradientColorDegree}deg, ${color.gradientColorStart}, ${color.gradientColorEnd})`;
-    petal.style.webkitAnimation = animations;
-    petal.style.animation = animations;
-    petal.style.borderRadius = `${randomInt(
-      this.settings.maxSize,
-      this.settings.maxSize + Math.floor(Math.random() * 10),
-    )}px ${randomInt(1, Math.floor(width / 4))}px`;
-    petal.style.height = `${height}px`;
-    petal.style.left = `${Math.random() * document.documentElement.clientWidth -
-      100}px`;
-    petal.style.marginTop = `${-(Math.floor(Math.random() * 20) + 15)}px`;
-    petal.style.width = `${width}px`;
-
-    // Remove petals of which the animation ended.
-    PrefixedEvent(petal, 'AnimationEnd', () => {
-      if (!elementInViewport(petal)) {
-        petal.remove();
-      }
-    });
-
-    // Remove petals that float out of the viewport.
-    PrefixedEvent(petal, 'AnimationIteration', () => {
-      if (!elementInViewport(petal)) {
-        petal.remove();
-      }
-    });
-
-    // Add the petal to the target element.
-    this.el.appendChild(petal);
   };
-
-  this.el.setAttribute(
-    'data-snowfall-anim-id',
-    window.requestAnimationFrame(this.createPetal),
-  );
-};
-
-snowfall.prototype.start = function() {
-  const animId = this.el.dataset.snowfallAnimId;
-  if (!animId) {
-    this.el.setAttribute(
-      'data-snowfall-anim-id',
-      window.requestAnimationFrame(this.createPetal),
-    );
-  } else {
-    throw new Error('snowfall is already running.');
-  }
-};
-
-snowfall.prototype.stop = function(graceful = false) {
-  const animId = this.el.dataset.snowfallAnimId;
-  if (animId) {
-    window.cancelAnimationFrame(animId);
-    this.el.setAttribute('data-snowfall-anim-id', '');
-  }
-
-  // Remove all current blossoms at once.
-  // You can also set 'graceful' to true to stop new petals from being created.
-  // This way the petals won't be removed abruptly.
-  if (!graceful) {
-    setTimeout(() => {
-      const petals = document.getElementsByClassName(this.settings.className);
-      while (petals.length > 0) {
-        petals[0].parentNode.removeChild(petals[0]);
-      }
-    }, this.settings.delay + 50);
-  }
-};
+  this.display = function() {
+    ellipse(this.posX, this.posY, this.size);
+  };
+}
