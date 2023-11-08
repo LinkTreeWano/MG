@@ -1,4 +1,4 @@
-const Sakura = function(selector, options) {
+const snowfall = function(selector, options) {
   if (typeof selector === 'undefined') {
     throw new Error('No selector present. Define an element.');
   }
@@ -7,7 +7,7 @@ const Sakura = function(selector, options) {
 
   // Defaults for the option object, which gets extended below.
   const defaults = {
-    className: 'sakura', // Classname of the petal. This corresponds with the css.
+    className: 'snowfall', // Classname of the petal. This corresponds with the css.
     fallSpeed: 1, // Speed factor in which the petal falls (higher is slower).
     maxSize: 14, // The maximum size of the petal.
     minSize: 10, // The minimum size of the petal.
@@ -77,7 +77,7 @@ const Sakura = function(selector, options) {
   }
 
   this.createPetal = () => {
-    if (this.el.dataset.sakuraAnimId) {
+    if (this.el.dataset.snowfallAnimId) {
       setTimeout(() => {
         window.requestAnimationFrame(this.createPetal);
       }, this.settings.delay);
@@ -163,28 +163,28 @@ const Sakura = function(selector, options) {
   };
 
   this.el.setAttribute(
-    'data-sakura-anim-id',
+    'data-snowfall-anim-id',
     window.requestAnimationFrame(this.createPetal),
   );
 };
 
-Sakura.prototype.start = function() {
-  const animId = this.el.dataset.sakuraAnimId;
+snowfall.prototype.start = function() {
+  const animId = this.el.dataset.snowfallAnimId;
   if (!animId) {
     this.el.setAttribute(
-      'data-sakura-anim-id',
+      'data-snowfall-anim-id',
       window.requestAnimationFrame(this.createPetal),
     );
   } else {
-    throw new Error('Sakura is already running.');
+    throw new Error('snowfall is already running.');
   }
 };
 
-Sakura.prototype.stop = function(graceful = false) {
-  const animId = this.el.dataset.sakuraAnimId;
+snowfall.prototype.stop = function(graceful = false) {
+  const animId = this.el.dataset.snowfallAnimId;
   if (animId) {
     window.cancelAnimationFrame(animId);
-    this.el.setAttribute('data-sakura-anim-id', '');
+    this.el.setAttribute('data-snowfall-anim-id', '');
   }
 
   // Remove all current blossoms at once.
